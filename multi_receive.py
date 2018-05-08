@@ -19,35 +19,45 @@ def main(host='localhost', port=8086):
 	mesh.setNodeID(0)
 	mesh.begin()
 	radio.setPALevel(RF24_PA_MAX) # Power Amplifier
+        radio.setAutoAck(True)
+        radio.enableDynamicPayloads()
+        radio.enableAckPayload()
 	radio.printDetails()
-	
+
 	while 1:
 		mesh.update()
 		mesh.DHCP()
-		while network.available():
-			header, payload = network.read(8)
-			if chr(header.type) == "H":
-				temperature, humidity = unpack('<fL', bytes(payload))
-				# timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ')
-                                # timeStamp = datetime.datetime.now().isoformat()
-                                timeStamp = datetime.datetime.utcnow()
-				node = oct(header.from_node)
+#		while network.available():
+#                    receive_payload = radio.read(radio.getDynamicPayloadSize())
+#                    print('Got payload size={} value="{}"'.format(len(receive_payload), receive_payload.decode('utf-8')))
 
-				print('{} Received payload temperature: {:+.2f}, humidity: {}% from node {}'.format(timeStamp, temperature, humidity, node))
-				json_body = [
-					{
-						"measurement": "rooms",
-						"tags": {
-							"node": node
-						},
-						"time": timeStamp,
-						"fields": {
-							"Temperature": temperature,
-							"Humidity": humidity
-						}
-					}
-				]
-				send_to_db(json_body)
+
+		header, payload = network.read(50)
+		node = oct(header.from_node)
+		if chr(header.type) == "H":
+			temperature, humidity = unpack('<fL', bytes(payload))
+			# timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                        # timeStamp = datetime.datetime.now().isoformat()
+                        timeStamp = datetime.datetime.utcnow()
+
+			print('{} Received payload temperature: {:+.2f}, humidity: {}% from node {}'.format(timeStamp, temperature, humidity, node))
+        		json_body = [
+			{
+				"measurement": "rooms",
+				"tags": {
+					"node": node
+				},
+				"time": timeStamp,
+				"fields": {
+					"Temperature": temperature,
+					"Humidity": humidity
+				}
+			}
+	        	]
+			send_to_db(json_body)
+                elif chr(header.type) == "I":
+                    print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
+
 		time.sleep(.1)
 
 	print('Exiting, no network...')
