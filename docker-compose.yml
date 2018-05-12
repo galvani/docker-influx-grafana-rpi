@@ -24,4 +24,4 @@ supervisord:
     restart: always
     image: dockerfile/supervisor
     volumes:
-        docker/supervisord/conf/master.conf:/etc/supervisor/conf.d 
+        - docker/supervisord/conf/master.conf:/etc/supervisor/conf.d 
