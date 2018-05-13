@@ -20,13 +20,3 @@ influxdb:
         - /var/lib/influxdb:/var/lib/influxdb
         - /var/log/influxdb:/var/log/influxdb
 
-python:
-        build: docker/python
-        volumes:
-          ./bin:/usr/bin/smartbase  
-
-supervisord:
-    restart: always
-    image: dockerfile/supervisor
-    volumes:
-        - docker/supervisord/conf/master.conf:/etc/supervisor/conf.d 
