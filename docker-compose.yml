@@ -1,5 +1,5 @@
 grafana:
-    image: docker/grafana
+    image: jsdidierlaurent/rpi-grafana
     ports:
         - 3000:3000
     volumes:
@@ -19,3 +19,4 @@ influxdb:
     volumes:
         - /var/lib/influxdb:/var/lib/influxdb
         - /var/log/influxdb:/var/log/influxdb
+

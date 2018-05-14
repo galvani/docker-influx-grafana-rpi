@@ -32,7 +32,7 @@ def main(host='localhost', port=8086):
 #                    print('Got payload size={} value="{}"'.format(len(receive_payload), receive_payload.decode('utf-8')))
 
 
-		header, payload = network.read(50)
+		header, payload = network.read(128)
 		node = oct(header.from_node)
 		if chr(header.type) == "H":
 			temperature, humidity = unpack('<fL', bytes(payload))
@@ -78,14 +78,8 @@ def send_to_db(json_body, host='localhost', port=8086):
 	#print("Create a retention policy")
 	client.create_retention_policy('awesome_policy', '3d', 3, default=True)
 
-	print("Write points: {0}".format(json_body))
+	#print("Write points: {0}".format(json_body))
 	response = client.write_points(json_body)
-	print "write_operation response", response
-
-	#print("Querying data: " + query)
-	# result = client.query(query)
-
-	#print("Result: {0}".format(result))
 
 
 def parse_args():
