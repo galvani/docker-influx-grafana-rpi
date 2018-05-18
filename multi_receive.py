@@ -34,9 +34,9 @@ def main(host='localhost', port=8086):
 
 		header, payload = network.read(128)
 		node = oct(header.from_node)
+                timeStamp = datetime.datetime.utcnow()
 		if chr(header.type) == "H":
 			temperature, humidity = unpack('<fL', bytes(payload))
-			timeStamp = datetime.datetime.utcnow()
 
 			print('{} Received payload temperature: {:+.2f}, humidity: {}% from node {}'.format(timeStamp, temperature, humidity, node))
 			json_body = [
@@ -76,7 +76,7 @@ def main(host='localhost', port=8086):
 			print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
 			json_body = [
 			{
-				"measurement": "nodeInfo",
+				"measurement": "rooms",
 				"tags": {
 					"node": node
 				},
