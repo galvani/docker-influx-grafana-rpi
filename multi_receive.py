@@ -34,11 +34,11 @@ def main(host='localhost', port=8086):
 
 		header, payload = network.read(128)
 		node = oct(header.from_node)
+                timeStamp = datetime.datetime.utcnow()
 		if chr(header.type) == "H":
 			temperature, humidity = unpack('<fL', bytes(payload))
 			# timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ')
                         # timeStamp = datetime.datetime.now().isoformat()
-                        timeStamp = datetime.datetime.utcnow()
 
 			print('{} Received payload temperature: {:+.2f}, humidity: {}% from node {}'.format(timeStamp, temperature, humidity, node))
         		json_body = [
@@ -56,8 +56,11 @@ def main(host='localhost', port=8086):
 	        	]
 			send_to_db(json_body)
                 elif chr(header.type) == "I":
-                    print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
-
+                    print("{} Received node info from node {}: {} bytes {}".format(timeStamp, node, len(payload), payload))
+                elif chr(header.type) == "S":
+                    print("{} Status received from node {}: {}".format(timeStamp, node, ord(payload)));
+                
+                    
 		time.sleep(.1)
 
 	print('Exiting, no network...')
