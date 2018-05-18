@@ -86,7 +86,7 @@ def main(host='localhost', port=8086):
 				}
 			}
 	        ]
-			send_to_db(json_body)
+			#send_to_db(json_body)
 
 		time.sleep(.1)
 
