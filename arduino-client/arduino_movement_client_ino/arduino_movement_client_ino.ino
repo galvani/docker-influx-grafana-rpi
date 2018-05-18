@@ -14,7 +14,6 @@
 #include <DHT.h>
 #include <DHT_U.h>
 
-
 //########### USER CONFIG ###########
 
 /**** Configure the nrf24l01 CE and CS pins ****/
@@ -37,6 +36,12 @@ String nodeInfo;
 int lastVal = LOW;
 
 void setup() {
+  // set up for batt voltage measurement
+  // REFS1 REFS0          --> 0 1, AVcc internal ref. -Selects AVcc external reference
+  // MUX3 MUX2 MUX1 MUX0  --> 1110 1.1V (VBG)         -Selects channel 14, bandgap voltage, to measure
+  ADMUX = (0<<REFS1) | (1<<REFS0) | (0<<ADLAR) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (0<<MUX0); 
+  delay(50);  // Let mux settle a little to get a more stable A/D conversion
+
   pinMode(2, INPUT_PULLUP);
   Serial.begin(115200);
   printf_begin();
@@ -54,6 +59,19 @@ void setup() {
   Serial.println(F("Connecting to the mesh..."));
   mesh.begin();
   sendInfo();
+}
+
+int getBattVolts() { // Returns actual value of Vcc (x 100)
+
+     const long InternalReferenceVoltage = 1080L;  // Adjust this value to your boards specific internal BG voltage x1000
+        // Start a conversion
+     ADCSRA |= _BV( ADSC );
+        // Wait for it to complete
+     while( ( (ADCSRA & (1<<ADSC)) != 0 ) );
+        // Scale the value
+        // 100L is my fudge factor to match my multimeter R2
+     int results = (((InternalReferenceVoltage * 1024L) / ADC) + 100L) / 10L;
+     return results;
 }
 
 void sendInfo() {
@@ -87,15 +105,15 @@ void sendInfo() {
 }
 
 void loop() {
-  mesh.update();
+  // mesh.update();
 
   int sensorVal = digitalRead(2);
 
   if (lastVal != sensorVal) {
       bool payloadValue = sensorVal == HIGH;
-      delay(10);
-      Serial.print("Sensor detected event, event ");
-      // Send to the master node every ~delayTime miliseconds
+      
+      //Serial.print("Sensor detected event, event ");
+      
       if (!mesh.write(&payloadValue, 'S', sizeof(payloadValue), masterNodeId)) {
         Serial.println(F("send fail"));
         if ( ! mesh.checkConnection() ) {
@@ -105,8 +123,9 @@ void loop() {
           Serial.println(F("send fail, Test OK"));
         }
       } else {
-        Serial.println(F("sent OK.")); 
+        //Serial.println(F("sent OK.")); 
       }
       lastVal = sensorVal;
   }
+  delay(200);
 }

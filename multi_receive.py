@@ -76,7 +76,7 @@ def main(host='localhost', port=8086):
 			print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
 			json_body = [
 			{
-				"measurement": "rooms",
+				"measurement": "nodeInfo",
 				"tags": {
 					"node": node
 				},
