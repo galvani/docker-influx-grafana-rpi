@@ -82,11 +82,11 @@ def main(host='localhost', port=8086):
 				},
 				"time": timeStamp,
 				"fields": {
-					"Info": payload,
+					"Info": payload.replace(' ','\\ '),
 				}
 			}
 	        ]
-			#send_to_db(json_body)
+			send_to_db(json_body)
 
 		time.sleep(.1)
 

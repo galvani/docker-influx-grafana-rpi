@@ -1,46 +1,26 @@
 #!/usr/bin/env python
 
 import sys
+
+sys.path.append('./connector')
+
 import subprocess
 import time
+import argparse
+import connector.mysql
 
-def main():
-    waitForNodeListener = 3;
-    proc = subprocess.Popen(['python3', '-u', 'node-master.py'],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+def main(host, port):
+    print "lol"
+
+def parse_args():
+    """Parse the args."""
+    parser = argparse.ArgumentParser(description='example code to play with InfluxDB')
+    parser.add_argument('--host', type=str, required=False,default='localhost',help='hostname of InfluxDB http API')
+    parser.add_argument('--port', type=int, required=False, default=8086,help='port of InfluxDB http API')
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(host=args.host, port=args.port)
     
-    print "Your app's PID is %s. Waiting for start up..." % proc.pid
-
-    start = time.time()
-    elapsed = 0
-
-    print start
-    try:
-        while (elapsed < waitForNodeListener):
-            nextline = proc.stdout.readline()
-            if nextline != '' or proc.poll() is None:
-                print "CHILD: {}".format(nextline.rstrip())
-
-            if proc.poll()==None:
-                # Process all what is necessary
-                current = time.time()
-                elapsed = current - start
-                time.sleep(.1)
-            else:
-                print "process finished, restarting...\n"
-                proc = subprocess.Popen(['python3', '-u', 'node-master.py'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT)
-                
-            time.sleep(.2)
-    finally:
-        proc.terminate()
-    app(proc)
-
-def app(monitor):
-    while (True):
-        print ("App is running, child [{}] is running\n".format(monitor.pid))
-        time.sleep(1)
-
-main()
