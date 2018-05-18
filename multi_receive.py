@@ -36,27 +36,57 @@ def main(host='localhost', port=8086):
 		node = oct(header.from_node)
 		if chr(header.type) == "H":
 			temperature, humidity = unpack('<fL', bytes(payload))
-			# timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ')
-                        # timeStamp = datetime.datetime.now().isoformat()
-                        timeStamp = datetime.datetime.utcnow()
+			timeStamp = datetime.datetime.utcnow()
 
 			print('{} Received payload temperature: {:+.2f}, humidity: {}% from node {}'.format(timeStamp, temperature, humidity, node))
-        		json_body = [
+			json_body = [
+				{
+					"measurement": "rooms",
+					"tags": {
+						"node": node
+					},
+					"time": timeStamp,
+					"fields": {
+						"Temperature": temperature,
+						"Humidity": humidity
+					}
+				}
+			]
+			send_to_db(json_body)
+
+		if chr(header.type) == "S":
+			status = ord(payload)
+			timeStamp = datetime.datetime.utcnow()
+
+			print('{} Received status update: {} from node {}'.format(timeStamp, status, node))
+			json_body = [
+				{
+					"measurement": "status",
+					"tags": {
+						"node": node
+					},
+					"time": timeStamp,
+					"fields": {
+						"Status": status
+					}
+				}
+			]
+			send_to_db(json_body)
+		if chr(header.type) == "I":
+			print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
+			json_body = [
 			{
-				"measurement": "rooms",
+				"measurement": "nodeInfo",
 				"tags": {
 					"node": node
 				},
 				"time": timeStamp,
 				"fields": {
-					"Temperature": temperature,
-					"Humidity": humidity
+					"Info": payload,
 				}
 			}
-	        	]
+	        ]
 			send_to_db(json_body)
-                elif chr(header.type) == "I":
-                    print("Received node info from node {}: {} bytes {}".format(node, len(payload), payload))
 
 		time.sleep(.1)
 
