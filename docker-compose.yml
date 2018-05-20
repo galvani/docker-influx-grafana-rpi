@@ -20,3 +20,7 @@ influxdb:
         - /var/lib/influxdb:/var/lib/influxdb
         - /var/log/influxdb:/var/log/influxdb
 
+homini:
+    build: docker/homini
+    ports:
+        - 8082:80

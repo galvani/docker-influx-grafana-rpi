@@ -82,7 +82,7 @@ def main(host='localhost', port=8086):
 				},
 				"time": timeStamp,
 				"fields": {
-					"Info": payload.replace(' ','\\ '),
+					"Info": "aaaa",
 				}
 			}
 	        ]
